@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [trades, setTrades] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedSymbol, setSelectedSymbol] = useState("BTCUSDT");
+  const [selectedSymbol] = useState("BTCUSDT");
 
   const { connected, tradeExecuted, balanceUpdate } = useWebSocket();
 
