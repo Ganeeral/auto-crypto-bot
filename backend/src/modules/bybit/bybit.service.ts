@@ -19,7 +19,7 @@ export interface KlineData {
 export class BybitService implements OnModuleInit {
   private readonly logger = new Logger(BybitService.name);
   private client: RestClientV5;
-  private wsClient: WebsocketClient;
+  private wsClient: any; // WebSocket client with dynamic event handlers
 
   constructor(
     private configService: ConfigService,
@@ -38,7 +38,7 @@ export class BybitService implements OnModuleInit {
       secret: this.configService.get("BYBIT_API_SECRET"),
       market: "v5",
       testnet: isTestnet,
-    });
+    }) as any;
   }
 
   async onModuleInit() {
@@ -46,14 +46,18 @@ export class BybitService implements OnModuleInit {
   }
 
   private setupWebSocket() {
-    this.wsClient.on("update", (data) => {
-      this.logger.debug(`WS Update: ${JSON.stringify(data)}`);
-      this.websocketGateway.sendMarketUpdate(data);
-    });
+    try {
+      this.wsClient.on("update", (data: any) => {
+        this.logger.debug(`WS Update: ${JSON.stringify(data)}`);
+        this.websocketGateway.sendMarketUpdate(data);
+      });
 
-    this.wsClient.on("error", (error) => {
-      this.logger.error("WebSocket error", error);
-    });
+      this.wsClient.on("error", (error: any) => {
+        this.logger.error("WebSocket error", error);
+      });
+    } catch (error) {
+      this.logger.error("Failed to setup WebSocket", error);
+    }
   }
 
   subscribeToTicker(symbol: string) {
@@ -75,7 +79,7 @@ export class BybitService implements OnModuleInit {
       const response = await this.client.getKline({
         category: "linear",
         symbol,
-        interval,
+        interval: interval as any, // Bybit SDK uses specific interval types
         limit,
       });
       return response.result.list.map((k: any) => ({
@@ -171,7 +175,7 @@ export class BybitService implements OnModuleInit {
     symbol: string,
     side: "Buy" | "Sell",
     stopLoss: string,
-    positionIdx: number = 0
+    positionIdx: 0 | 1 | 2 = 0
   ) {
     try {
       const response = await this.client.setTradingStop({

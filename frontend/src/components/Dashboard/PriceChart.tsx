@@ -30,18 +30,18 @@ interface PriceChartProps {
 
 export function PriceChart({ symbol }: PriceChartProps) {
   const [chartData, setChartData] = useState<any>(null);
-  const [interval, setInterval] = useState("15");
+  const [timeframe, setTimeframe] = useState("15");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchKlineData();
-    const intervalId = setInterval(fetchKlineData, 30000);
+    const intervalId = setInterval(() => fetchKlineData(), 30000);
     return () => clearInterval(intervalId);
-  }, [symbol, interval]);
+  }, [symbol, timeframe]);
 
   const fetchKlineData = async () => {
     try {
-      const response = await bybitApi.getKline(symbol, interval, 100);
+      const response = await bybitApi.getKline(symbol, timeframe, 100);
       const klines = response.data;
 
       const labels = klines.map((k: any) => 
@@ -117,9 +117,9 @@ export function PriceChart({ symbol }: PriceChartProps) {
           {["1", "5", "15", "60", "240"].map((int) => (
             <button
               key={int}
-              onClick={() => setInterval(int)}
+              onClick={() => setTimeframe(int)}
               className={`px-3 py-1 rounded ${
-                interval === int
+                timeframe === int
                   ? "bg-blue-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
