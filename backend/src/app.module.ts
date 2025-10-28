@@ -16,7 +16,7 @@ import { WebsocketModule } from "./modules/websocket/websocket.module";
       envFilePath: ".env",
     }),
 
-    // База данных PostgreSQL
+    // База данных PostgreSQL с retry логикой
     TypeOrmModule.forRoot({
       type: "postgres",
       host: process.env.DATABASE_HOST || "localhost",
@@ -26,6 +26,21 @@ import { WebsocketModule } from "./modules/websocket/websocket.module";
       database: process.env.POSTGRES_DB || "trading_bot",
       entities: [__dirname + "/**/*.entity{.ts,.js}"],
       synchronize: true, // В production ставь false и используй миграции
+      
+      // Retry configuration
+      maxQueryExecutionTime: 30000, // 30 seconds timeout for queries
+      connectTimeoutMS: 10000, // 10 seconds connection timeout
+      
+      // Additional connection options for PostgreSQL
+      extra: {
+        connectionTimeoutMillis: 10000, // Connection timeout
+        idleTimeoutMillis: 30000, // Idle timeout
+        max: 10, // Maximum pool size
+        min: 2, // Minimum pool size
+      },
+      
+      // Logging for debugging connection issues
+      logging: process.env.NODE_ENV === "development" ? ["error", "warn"] : false,
     }),
 
     // Планировщик для автоматических задач
