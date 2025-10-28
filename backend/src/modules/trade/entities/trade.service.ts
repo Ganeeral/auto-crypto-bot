@@ -51,7 +51,7 @@ export class TradeService {
     // 1. Получить исторические данные с Bybit
     const klineData = await this.bybitService.getKlineData(
       symbol,
-      strategy.timeframe,
+      strategy.timeframe as any, // Cast to KlineIntervalV3
       200
     );
 

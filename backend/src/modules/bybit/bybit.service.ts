@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { RestClientV5, WebsocketClient } from "bybit-api";
+import { RestClientV5, WebsocketClient, KlineIntervalV3 } from "bybit-api";
+import { PositionIdx } from "bybit-api";
 import { WebsocketGateway } from "../websocket/websocket.gateway";
 
 export interface KlineData {
@@ -51,7 +52,7 @@ export class BybitService implements OnModuleInit {
       this.websocketGateway.sendMarketUpdate(data);
     });
 
-    this.wsClient.on("error", (error) => {
+    this.wsClient.on("exception" as any, (error: any) => {
       this.logger.error("WebSocket error", error);
     });
   }
@@ -61,14 +62,14 @@ export class BybitService implements OnModuleInit {
     this.logger.log(`Subscribed to ticker: ${symbol}`);
   }
 
-  subscribeToKline(symbol: string, interval: string = "15") {
+  subscribeToKline(symbol: string, interval: KlineIntervalV3 = "15") {
     this.wsClient.subscribe([`kline.${interval}.${symbol}`]);
     this.logger.log(`Subscribed to kline: ${symbol} ${interval}m`);
   }
 
   async getKlineData(
     symbol: string,
-    interval: string = "15",
+    interval: KlineIntervalV3 = "15",
     limit: number = 200
   ): Promise<KlineData[]> {
     try {
@@ -171,7 +172,7 @@ export class BybitService implements OnModuleInit {
     symbol: string,
     side: "Buy" | "Sell",
     stopLoss: string,
-    positionIdx: number = 0
+    positionIdx: PositionIdx = 0
   ) {
     try {
       const response = await this.client.setTradingStop({
