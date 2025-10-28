@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 export function useSocket(url: string) {
   const [marketUpdate, setMarketUpdate] = useState(null);
   const [tradeExecuted, setTradeExecuted] = useState(null);
-  const socketRef = useRef();
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     socketRef.current = io(url);
@@ -13,7 +13,7 @@ export function useSocket(url: string) {
     socketRef.current.on("tradeExecuted", setTradeExecuted);
 
     return () => {
-      socketRef.current.disconnect();
+      socketRef.current?.disconnect();
     };
   }, [url]);
 
