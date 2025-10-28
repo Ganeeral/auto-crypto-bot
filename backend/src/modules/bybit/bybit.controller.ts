@@ -7,6 +7,7 @@ import {
   Query,
   Delete,
 } from "@nestjs/common";
+import { KlineIntervalV3 } from "bybit-api";
 import { BybitService } from "./bybit.service";
 
 @Controller("api/bybit")
@@ -39,7 +40,7 @@ export class BybitController {
   @Get("kline/:symbol")
   async getKlineData(
     @Param("symbol") symbol: string,
-    @Query("interval") interval: string = "15",
+    @Query("interval") interval: KlineIntervalV3 = "15",
     @Query("limit") limit: number = 200
   ) {
     return this.bybitService.getKlineData(symbol, interval, limit);
